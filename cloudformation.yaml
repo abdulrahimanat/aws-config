@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Abdul
+Description: 'AWS CloudFormation for config'
+Parameters:
+  DeliveryChannelExists:
+    Type: String
+    Description: 'Do you have an exisiting AWS Config delivery channel?'
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+Conditions:
+  CreateDeliveryChannel: !Equals [ !Ref DeliveryChannelExists, 'false' ]
+Resources:
+  ConfigRecorder:
+    Type: AWS::Config::ConfigurationRecorder
+    Properties:
+      Name: default
+      RoleARN: !GetAtt [ConfigRole, Arn]
+  DeliveryChannel:
+    Condition: CreateDeliveryChannel
+    Type: AWS::Config::DeliveryChannel
+    Properties:
+      ConfigSnapshotDeliveryProperties:
+        DeliveryFrequency: Six_Hours
+      S3BucketName: !Ref 'ConfigBucket'
+      SnsTopicARN: !Ref 'ConfigTopic'
+  ConfigBucket:
+    Type: AWS::S3::Bucket
+  ConfigTopic:
+    Type: AWS::SNS::Topic
+  ConfigTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: ConfigTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: config.amazonaws.com
+          Action: SNS:Publish
+          Resource: '*'
+      Topics: [!Ref 'ConfigTopic']
+  ConfigRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [config.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: s3:GetBucketAcl
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'ConfigBucket']]
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'ConfigBucket', /AWSLogs/,
+                !Ref 'AWS::AccountId', /*]]
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Effect: Allow
+            Action: config:Put*
+            Resource: '*'
