@@ -89,5 +89,5 @@ create_custom_config_policy
 attach_custom_config_policy
 create_sns_topic
 create_s3_bucket
-sleep 5s
+sleep 10s
 enable_aws_config
