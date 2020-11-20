@@ -2,7 +2,7 @@
 set -euox pipefail
 
 #Variables
-ROLE_NAME=test-config
+ROLE_NAME=test-configwe
 POLICY_NAME=my-policys
 S3_BUCKET=prince-hellogds
 SNS_TOPIC=test-topics
