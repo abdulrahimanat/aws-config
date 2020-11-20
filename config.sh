@@ -3,9 +3,9 @@ set -euox pipefail
 
 #Variables
 ROLE_NAME=test-config
-POLICY_NAME=my-policy
-S3_BUCKET=prince-hellogd
-SNS_TOPIC=test-topic
+POLICY_NAME=my-policys
+S3_BUCKET=prince-hellogds
+SNS_TOPIC=test-topics
 
 TRUST_POLICY='{
   "Version": "2012-10-17",
