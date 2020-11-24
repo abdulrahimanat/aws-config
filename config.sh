@@ -89,6 +89,7 @@ put_config() {
 put_config=$(aws configservice put-configuration-recorder --configuration-recorder name=default,roleARN=$ARN --recording-group allSupported=true,includeGlobalResourceTypes=$includeGlobalResourceTypes --region $AWS_REGION)
 }
 
+# SNS topic has to be create before it's ARN has called in delivery channel
 create_sns_topic
 
 
